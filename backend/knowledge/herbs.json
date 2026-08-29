@@ -1,0 +1,62 @@
+[
+  {
+    "id": "herb:fenugreek",
+    "name": "Fenugreek",
+    "synonyms": ["fenugreek", "methi", "trigonella foenum-graecum", "methi seeds", "fenugreek seeds"]
+  },
+  {
+    "id": "herb:turmeric",
+    "name": "Turmeric",
+    "synonyms": ["turmeric", "haldi", "curcuma longa", "curcumin", "haridra"]
+  },
+  {
+    "id": "herb:ashwagandha",
+    "name": "Ashwagandha",
+    "synonyms": ["ashwagandha", "withania somnifera", "indian ginseng", "asgandh"]
+  },
+  {
+    "id": "herb:ginger",
+    "name": "Ginger",
+    "synonyms": ["ginger", "adrak", "zingiber officinale", "sonth"]
+  },
+  {
+    "id": "herb:garlic",
+    "name": "Garlic",
+    "synonyms": ["garlic", "lahsun", "allium sativum", "lehsun"]
+  },
+  {
+    "id": "herb:ginkgo",
+    "name": "Ginkgo Biloba",
+    "synonyms": ["ginkgo", "ginkgo biloba", "maidenhair tree"]
+  },
+  {
+    "id": "herb:ginseng",
+    "name": "Ginseng",
+    "synonyms": ["ginseng", "panax ginseng", "asian ginseng", "korean ginseng"]
+  },
+  {
+    "id": "herb:neem",
+    "name": "Neem",
+    "synonyms": ["neem", "azadirachta indica", "nimba", "margosa"]
+  },
+  {
+    "id": "herb:tulsi",
+    "name": "Holy Basil",
+    "synonyms": ["tulsi", "holy basil", "ocimum sanctum", "sacred basil"]
+  },
+  {
+    "id": "herb:amla",
+    "name": "Indian Gooseberry",
+    "synonyms": ["amla", "amalaki", "indian gooseberry", "phyllanthus emblica", "emblica officinalis"]
+  },
+  {
+    "id": "herb:triphala",
+    "name": "Triphala",
+    "synonyms": ["triphala", "trifala", "three fruits"]
+  },
+  {
+    "id": "herb:brahmi",
+    "name": "Brahmi",
+    "synonyms": ["brahmi", "bacopa monnieri", "water hyssop", "bacopa"]
+  }
+]
