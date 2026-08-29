@@ -1,0 +1,62 @@
+[
+  {
+    "id": "drug:metformin",
+    "name": "Metformin",
+    "synonyms": ["metformin", "glucophage", "glycomet", "glyciphage", "diabex", "fortamet"]
+  },
+  {
+    "id": "drug:warfarin",
+    "name": "Warfarin",
+    "synonyms": ["warfarin", "coumadin", "jantoven", "marevan", "waran"]
+  },
+  {
+    "id": "drug:aspirin",
+    "name": "Aspirin",
+    "synonyms": ["aspirin", "acetylsalicylic acid", "disprin", "ecosprin", "asa"]
+  },
+  {
+    "id": "drug:levothyroxine",
+    "name": "Levothyroxine",
+    "synonyms": ["levothyroxine", "synthroid", "levoxyl", "thyrox", "eltroxin"]
+  },
+  {
+    "id": "drug:lisinopril",
+    "name": "Lisinopril",
+    "synonyms": ["lisinopril", "prinivil", "zestril", "lopril"]
+  },
+  {
+    "id": "drug:atorvastatin",
+    "name": "Atorvastatin",
+    "synonyms": ["atorvastatin", "lipitor", "atorva", "storvas", "torvast"]
+  },
+  {
+    "id": "drug:omeprazole",
+    "name": "Omeprazole",
+    "synonyms": ["omeprazole", "prilosec", "losec", "omez", "omepral"]
+  },
+  {
+    "id": "drug:paracetamol",
+    "name": "Paracetamol",
+    "synonyms": ["paracetamol", "acetaminophen", "tylenol", "crocin", "dolo", "calpol"]
+  },
+  {
+    "id": "drug:amlodipine",
+    "name": "Amlodipine",
+    "synonyms": ["amlodipine", "norvasc", "amlong", "amlodac", "stamlo"]
+  },
+  {
+    "id": "drug:insulin",
+    "name": "Insulin",
+    "synonyms": ["insulin", "humulin", "novolin", "lantus", "humalog"]
+  },
+  {
+    "id": "drug:digoxin",
+    "name": "Digoxin",
+    "synonyms": ["digoxin", "lanoxin", "digitalis"]
+  },
+  {
+    "id": "drug:clopidogrel",
+    "name": "Clopidogrel",
+    "synonyms": ["clopidogrel", "plavix", "clopivas", "deplatt"]
+  }
+]
