@@ -19,6 +19,10 @@ from store import (
     update_consult,
 )
 
+# Import the normalization and interaction engines (Phase 2)
+from normalize import normalize_list
+from interactions import check
+
 
 # ---------------------------------------------------------------------------
 # FastAPI app setup
@@ -106,7 +110,7 @@ def transcribe_route(consult_id: str, req: TranscribeRequest):
 def extract_route(consult_id: str):
     """
     Extract clinical entities from the transcript.
-    For now, returns MOCK data. Status -> 'extracted'.
+    For now, returns MOCK data that matches our demo scenario. Status -> 'extracted'.
 
     In Phase 3, we will replace this with a real rule-based extractor.
     """
@@ -114,13 +118,13 @@ def extract_route(consult_id: str):
     if consult is None:
         raise HTTPException(status_code=404, detail="Consultation not found")
 
-    # MOCK entities — this is just a placeholder to show the shape
+    # MOCK entities — designed to trigger the Metformin + Fenugreek interaction
     mock_entities = {
-        "symptoms": ["fever", "headache", "fatigue"],
+        "symptoms": ["fatigue"],
         "conditions": ["Type 2 Diabetes"],
         "medications": [
             {"name": "Metformin", "dosage": "500mg", "frequency": "twice daily", "system": "allopathy"},
-            {"name": "Fenugreek seeds", "dosage": "1 tsp", "frequency": "daily", "system": "ayush"},
+            {"name": "Methi", "dosage": "1 tsp", "frequency": "daily", "system": "ayush"},  # Hindi name for Fenugreek
         ],
         "allergies": [],
         "advice": "Continue current medications, monitor blood sugar",
@@ -137,28 +141,37 @@ def extract_route(consult_id: str):
 def reconcile_route(consult_id: str):
     """
     Normalize and reconcile the extracted medications into a unified profile.
-    For now, returns MOCK data. Status -> 'reconciled'.
-
-    In Phase 2, we will map medicine names to standard IDs from our knowledge base.
+    Now uses the REAL normalization engine from normalize.py. Status -> 'reconciled'.
     """
     consult = get_consult(consult_id)
     if consult is None:
         raise HTTPException(status_code=404, detail="Consultation not found")
 
-    # MOCK unified medicine profile — just a placeholder
-    mock_medicines = {
-        "allopathy": [
-            {"id": "RxNorm:6809", "name": "Metformin", "dosage": "500mg", "frequency": "twice daily"}
-        ],
-        "ayush": [
-            {"id": "AYUSH:FEN001", "name": "Fenugreek (Trigonella foenum-graecum)", "dosage": "1 tsp", "frequency": "daily"}
-        ],
-        "unrecognized": [],  # Any medicines we couldn't identify go here
+    # Get the extracted medications from the previous step
+    entities = consult.get("entities", {})
+    medications = entities.get("medications", [])
+
+    if not medications:
+        raise HTTPException(status_code=400, detail="No medications to reconcile. Run /extract first.")
+
+    # Use the real normalization engine
+    normalized_meds = normalize_list(medications)
+
+    # Separate by type for the response
+    allopathy = [m for m in normalized_meds if m.get("type") == "drug"]
+    ayush = [m for m in normalized_meds if m.get("type") == "herb"]
+    unrecognized = [m for m in normalized_meds if m.get("flagged", False)]
+
+    med_profile = {
+        "allopathy": allopathy,
+        "ayush": ayush,
+        "unrecognized": unrecognized,
+        "all": normalized_meds,  # Keep the full list for the interaction engine
     }
 
     updated = update_consult(
         consult_id,
-        {"medicines": mock_medicines, "status": "reconciled"}
+        {"med_profile": med_profile, "status": "reconciled"}
     )
     return updated
 
@@ -167,34 +180,32 @@ def reconcile_route(consult_id: str):
 def check_interactions_route(consult_id: str):
     """
     Check for dangerous drug-drug and herb-drug interactions.
-    For now, returns MOCK data with ONE interaction alert. Status -> 'checked'.
+    Now uses the REAL interaction engine from interactions.py. Status -> 'checked'.
 
-    In Phase 2, we will replace this with a real interaction engine that reads
-    from a curated interactions.json file. The LLM will NEVER decide if two
-    things interact — only the data file does that.
+    The LLM will NEVER decide if two things interact — only the curated
+    data file does that. The AI proposes; the knowledge graph disposes.
     """
     consult = get_consult(consult_id)
     if consult is None:
         raise HTTPException(status_code=404, detail="Consultation not found")
 
-    # MOCK interaction alert — just a placeholder
-    mock_interactions = [
-        {
-            "drug_a": {"name": "Metformin", "id": "RxNorm:6809"},
-            "drug_b": {"name": "Fenugreek", "id": "AYUSH:FEN001"},
-            "risk_level": "high",
-            "description": "Fenugreek may enhance the hypoglycemic effect of Metformin, increasing risk of low blood sugar.",
-            "evidence": {
-                "source": "Mock Database",
-                "citation": "Placeholder citation — real data in Phase 2",
-            },
-            "recommendation": "Monitor blood glucose closely. Consider dose adjustment.",
-        }
-    ]
+    # Get the normalized medication profile from the previous step
+    med_profile = consult.get("med_profile", {})
+    all_meds = med_profile.get("all", [])
+
+    if not all_meds:
+        raise HTTPException(status_code=400, detail="No medications to check. Run /reconcile first.")
+
+    # Get patient conditions from the extracted entities
+    entities = consult.get("entities", {})
+    conditions = entities.get("conditions", [])
+
+    # Use the real interaction engine
+    alerts = check(all_meds, conditions)
 
     updated = update_consult(
         consult_id,
-        {"interactions": mock_interactions, "status": "checked"}
+        {"alerts": alerts, "status": "checked"}
     )
     return updated
 
