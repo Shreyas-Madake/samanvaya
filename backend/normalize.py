@@ -8,9 +8,9 @@ HOW:   Run this file directly to test: python normalize.py
 """
 
 import json
-import os
 from pathlib import Path
 from difflib import SequenceMatcher
+from typing import List, Dict, Optional
 
 
 # ---------------------------------------------------------------------------
@@ -34,7 +34,7 @@ with open(KNOWLEDGE_DIR / "herbs.json", "r", encoding="utf-8") as f:
 
 # This dict maps every synonym (lowercased) to the full node object.
 # Example: "methi" -> {"id": "herb:fenugreek", "name": "Fenugreek", "type": "herb"}
-SYNONYM_MAP = {}
+SYNONYM_MAP: Dict[str, Dict] = {}
 
 for drug in DRUGS:
     node = {"id": drug["id"], "name": drug["name"], "type": "drug"}
@@ -93,7 +93,7 @@ def normalize(name: str, fuzzy_threshold: float = 0.85):
             best_score = score
             best_match = node
 
-    if best_score >= fuzzy_threshold:
+    if best_score >= fuzzy_threshold and best_match is not None:
         return {
             "original": name,
             "norm_id": best_match["id"],
