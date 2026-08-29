@@ -1,0 +1,371 @@
+[
+  {
+    "id": "int:metformin-fenugreek",
+    "a": {
+      "id": "drug:metformin",
+      "name": "Metformin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:fenugreek",
+      "name": "Fenugreek",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Additive hypoglycemia (low blood sugar)",
+    "risk": "high",
+    "mechanism": "Fenugreek seeds contain soluble fiber and compounds that lower blood glucose. When combined with Metformin, the blood sugar-lowering effects are additive, increasing the risk of hypoglycemia.",
+    "recommendation": "Monitor blood glucose levels closely. Consider reducing Metformin dose if hypoglycemic symptoms occur. Patient should be counseled to recognize signs of low blood sugar.",
+    "conditions": ["diabetes", "type 2 diabetes", "prediabetes"],
+    "evidence": [
+      {
+        "source": "Journal of Ethnopharmacology",
+        "ref": "doi:10.1016/j.jep.2009.04.018",
+        "note": "Fenugreek seed extract demonstrated significant hypoglycemic activity in diabetic patients"
+      },
+      {
+        "source": "Phytotherapy Research",
+        "ref": "PMID: 20623589",
+        "note": "Case reports of enhanced hypoglycemia when fenugreek combined with oral antidiabetic agents"
+      }
+    ]
+  },
+  {
+    "id": "int:warfarin-turmeric",
+    "a": {
+      "id": "drug:warfarin",
+      "name": "Warfarin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:turmeric",
+      "name": "Turmeric",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Increased bleeding risk",
+    "risk": "high",
+    "mechanism": "Curcumin in turmeric has antiplatelet and anticoagulant properties. Combined with warfarin, this significantly increases bleeding risk and INR values.",
+    "recommendation": "Avoid concurrent use or monitor INR more frequently. Patient should report any unusual bleeding or bruising immediately.",
+    "conditions": ["atrial fibrillation", "thrombosis", "clotting disorder"],
+    "evidence": [
+      {
+        "source": "Thrombosis Research",
+        "ref": "doi:10.1016/j.thromres.2012.09.009",
+        "note": "Curcumin demonstrated antiplatelet and anticoagulant effects in vitro and in vivo"
+      }
+    ]
+  },
+  {
+    "id": "int:levothyroxine-ashwagandha",
+    "a": {
+      "id": "drug:levothyroxine",
+      "name": "Levothyroxine",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:ashwagandha",
+      "name": "Ashwagandha",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Excessive thyroid stimulation",
+    "risk": "moderate",
+    "mechanism": "Ashwagandha may increase thyroid hormone production. When combined with levothyroxine, this can lead to hyperthyroidism symptoms.",
+    "recommendation": "Monitor thyroid function tests (TSH, T3, T4) regularly. Adjust levothyroxine dose as needed. Watch for symptoms of hyperthyroidism.",
+    "conditions": ["hypothyroidism", "thyroid disorder"],
+    "evidence": [
+      {
+        "source": "Journal of Alternative and Complementary Medicine",
+        "ref": "doi:10.1089/acm.2017.0183",
+        "note": "Ashwagandha root extract significantly increased T3 and T4 levels in subclinical hypothyroid patients"
+      }
+    ]
+  },
+  {
+    "id": "int:aspirin-ginger",
+    "a": {
+      "id": "drug:aspirin",
+      "name": "Aspirin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:ginger",
+      "name": "Ginger",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Increased bleeding risk",
+    "risk": "moderate",
+    "mechanism": "Ginger inhibits thromboxane synthetase, reducing platelet aggregation. Combined with aspirin's antiplatelet effects, bleeding risk increases.",
+    "recommendation": "Use caution. Monitor for signs of bleeding, especially before surgery or dental procedures.",
+    "conditions": ["cardiovascular disease", "post-MI", "stroke prevention"],
+    "evidence": [
+      {
+        "source": "Prostaglandins Leukot Essent Fatty Acids",
+        "ref": "PMID: 12895595",
+        "note": "Ginger extract inhibited platelet aggregation in human subjects"
+      }
+    ]
+  },
+  {
+    "id": "int:warfarin-garlic",
+    "a": {
+      "id": "drug:warfarin",
+      "name": "Warfarin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:garlic",
+      "name": "Garlic",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Increased bleeding risk",
+    "risk": "high",
+    "mechanism": "Garlic has antithrombotic properties and may potentiate the anticoagulant effect of warfarin.",
+    "recommendation": "Avoid high-dose garlic supplements. If patient insists on garlic use, monitor INR more frequently.",
+    "conditions": ["atrial fibrillation", "thrombosis", "clotting disorder"],
+    "evidence": [
+      {
+        "source": "Pharmacotherapy",
+        "ref": "PMID: 11794436",
+        "note": "Case report of increased INR when garlic supplement added to warfarin therapy"
+      }
+    ]
+  },
+  {
+    "id": "int:warfarin-ginkgo",
+    "a": {
+      "id": "drug:warfarin",
+      "name": "Warfarin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:ginkgo",
+      "name": "Ginkgo Biloba",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Increased bleeding risk",
+    "risk": "high",
+    "mechanism": "Ginkgo inhibits platelet-activating factor and may enhance anticoagulant effects.",
+    "recommendation": "Avoid concurrent use. If used together, monitor INR closely and watch for bleeding.",
+    "conditions": ["atrial fibrillation", "thrombosis"],
+    "evidence": [
+      {
+        "source": "Annals of Internal Medicine",
+        "ref": "PMID: 9735767",
+        "note": "Case reports of spontaneous bleeding associated with ginkgo use"
+      }
+    ]
+  },
+  {
+    "id": "int:insulin-fenugreek",
+    "a": {
+      "id": "drug:insulin",
+      "name": "Insulin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:fenugreek",
+      "name": "Fenugreek",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Additive hypoglycemia",
+    "risk": "high",
+    "mechanism": "Both insulin and fenugreek lower blood glucose, leading to potentially dangerous hypoglycemia.",
+    "recommendation": "Monitor blood glucose very closely. Insulin dose may need reduction. Educate patient on hypoglycemia symptoms.",
+    "conditions": ["diabetes", "type 1 diabetes", "type 2 diabetes"],
+    "evidence": [
+      {
+        "source": "European Journal of Clinical Nutrition",
+        "ref": "doi:10.1038/sj.ejcn.1602856",
+        "note": "Fenugreek improved glycemic control in type 1 diabetes patients"
+      }
+    ]
+  },
+  {
+    "id": "int:digoxin-ginseng",
+    "a": {
+      "id": "drug:digoxin",
+      "name": "Digoxin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:ginseng",
+      "name": "Ginseng",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacokinetic",
+    "effect": "Altered digoxin levels",
+    "risk": "moderate",
+    "mechanism": "Ginseng may interfere with digoxin assays and potentially alter digoxin pharmacokinetics.",
+    "recommendation": "Monitor digoxin levels and cardiac function. Consider alternative herbs.",
+    "conditions": ["heart failure", "atrial fibrillation"],
+    "evidence": [
+      {
+        "source": "Circulation",
+        "ref": "PMID: 12707240",
+        "note": "Ginseng caused false elevation of digoxin immunoassay results"
+      }
+    ]
+  },
+  {
+    "id": "int:clopidogrel-turmeric",
+    "a": {
+      "id": "drug:clopidogrel",
+      "name": "Clopidogrel",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:turmeric",
+      "name": "Turmeric",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Increased bleeding risk",
+    "risk": "moderate",
+    "mechanism": "Both clopidogrel and turmeric have antiplatelet effects, increasing bleeding tendency.",
+    "recommendation": "Use with caution. Monitor for bleeding, especially gastrointestinal or unusual bruising.",
+    "conditions": ["post-stent", "coronary artery disease", "peripheral artery disease"],
+    "evidence": [
+      {
+        "source": "Drug Safety",
+        "ref": "doi:10.1007/s40264-015-0367-x",
+        "note": "Additive antiplatelet effects increase bleeding risk when antiplatelet drugs combined with herbs"
+      }
+    ]
+  },
+  {
+    "id": "int:lisinopril-garlic",
+    "a": {
+      "id": "drug:lisinopril",
+      "name": "Lisinopril",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:garlic",
+      "name": "Garlic",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Excessive blood pressure lowering",
+    "risk": "moderate",
+    "mechanism": "Garlic has modest blood pressure-lowering effects. Combined with ACE inhibitors, may cause hypotension.",
+    "recommendation": "Monitor blood pressure regularly. Watch for dizziness or fainting. Dose adjustment may be needed.",
+    "conditions": ["hypertension", "heart failure"],
+    "evidence": [
+      {
+        "source": "BMC Cardiovascular Disorders",
+        "ref": "doi:10.1186/1471-2261-8-13",
+        "note": "Garlic preparations showed blood pressure lowering effects in hypertensive patients"
+      }
+    ]
+  },
+  {
+    "id": "int:atorvastatin-ginger",
+    "a": {
+      "id": "drug:atorvastatin",
+      "name": "Atorvastatin",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:ginger",
+      "name": "Ginger",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Additive lipid-lowering effect",
+    "risk": "low",
+    "mechanism": "Ginger may have modest cholesterol-lowering effects, potentially enhancing statin effects.",
+    "recommendation": "Generally safe combination. Monitor lipid panel and liver function as usual with statin therapy.",
+    "conditions": ["hyperlipidemia", "high cholesterol"],
+    "evidence": [
+      {
+        "source": "Saudi Medical Journal",
+        "ref": "PMID: 18813412",
+        "note": "Ginger showed lipid-lowering effects in hyperlipidemic patients"
+      }
+    ]
+  },
+  {
+    "id": "int:omeprazole-turmeric",
+    "a": {
+      "id": "drug:omeprazole",
+      "name": "Omeprazole",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:turmeric",
+      "name": "Turmeric",
+      "type": "herb"
+    },
+    "interaction_type": "complementary",
+    "effect": "Synergistic gastric protection",
+    "risk": "low",
+    "mechanism": "Both have gastroprotective properties. Turmeric has anti-inflammatory effects that may complement PPI therapy.",
+    "recommendation": "Generally considered safe. May provide additional gastric protection.",
+    "conditions": ["GERD", "peptic ulcer", "gastritis"],
+    "evidence": [
+      {
+        "source": "World Journal of Gastroenterology",
+        "ref": "doi:10.3748/wjg.v20.i32.11033",
+        "note": "Curcumin demonstrated gastroprotective effects in various models"
+      }
+    ]
+  },
+  {
+    "id": "int:amlodipine-ginkgo",
+    "a": {
+      "id": "drug:amlodipine",
+      "name": "Amlodipine",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:ginkgo",
+      "name": "Ginkgo Biloba",
+      "type": "herb"
+    },
+    "interaction_type": "pharmacodynamic",
+    "effect": "Potential blood pressure elevation",
+    "risk": "moderate",
+    "mechanism": "Ginkgo may interfere with calcium channel blocker effects or cause paradoxical blood pressure increase in some patients.",
+    "recommendation": "Monitor blood pressure. Consider alternative herbs for cognitive support.",
+    "conditions": ["hypertension"],
+    "evidence": [
+      {
+        "source": "Clinical Pharmacology and Therapeutics",
+        "ref": "PMID: 16331240",
+        "note": "Ginkgo showed potential to alter blood pressure medication effects"
+      }
+    ]
+  },
+  {
+    "id": "int:paracetamol-turmeric",
+    "a": {
+      "id": "drug:paracetamol",
+      "name": "Paracetamol",
+      "type": "drug"
+    },
+    "b": {
+      "id": "herb:turmeric",
+      "name": "Turmeric",
+      "type": "herb"
+    },
+    "interaction_type": "complementary",
+    "effect": "Additive anti-inflammatory effect",
+    "risk": "low",
+    "mechanism": "Both have analgesic and anti-inflammatory properties. May provide enhanced pain relief.",
+    "recommendation": "Generally safe. May allow lower paracetamol doses. Still observe maximum daily paracetamol limits.",
+    "conditions": ["pain", "inflammation", "arthritis"],
+    "evidence": [
+      {
+        "source": "Journal of Clinical Pharmacology",
+        "ref": "doi:10.1177/0091270006289066",
+        "note": "Curcumin demonstrated comparable efficacy to NSAIDs in some pain conditions"
+      }
+    ]
+  }
+]
