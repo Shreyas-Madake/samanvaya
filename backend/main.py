@@ -26,6 +26,9 @@ from interactions import check
 # Import the real extractor (Phase 3)
 from extract import extract
 
+# Import the FHIR bundle generator (Phase 4)
+from fhir_bundle import generate_fhir_bundle
+
 
 # ---------------------------------------------------------------------------
 # FastAPI app setup
@@ -211,19 +214,43 @@ def check_interactions_route(consult_id: str):
 def approve_route(consult_id: str):
     """
     Clinician has reviewed the interactions and approved the record.
-    For now, returns a mock 'saved' confirmation. Status -> 'approved'.
 
-    In Phase 4, we will generate a FHIR R4 resource bundle here and save it.
+    WHAT: Generates a FHIR R4 Bundle containing the complete health record.
+    WHY:  ABDM (Ayushman Bharat Digital Mission) requires health records in FHIR format
+          for interoperability across the Indian healthcare system.
+    HOW:  Takes the consultation data (patient, meds, alerts) and packages it into
+          a standard FHIR Bundle that can be shared with other healthcare providers,
+          stored in health repositories, or sent to the patient's PHR app.
+
+    Status -> 'approved'.
     """
     consult = get_consult(consult_id)
     if consult is None:
         raise HTTPException(status_code=404, detail="Consultation not found")
 
-    # In the real system, we would generate a FHIR bundle and save it to a database.
-    # For now, just mark it as approved.
-    updated = update_consult(consult_id, {"status": "approved"})
+    # Get the patient data (needed for the FHIR Patient resource)
+    patient_id = consult.get("patient_id")
+    patient = get_patient(patient_id)
+    if patient is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
 
-    return {"saved": True, "consult": updated}
+    # Generate the FHIR R4 Bundle
+    # This creates a standardized health record containing:
+    #   - Patient demographics
+    #   - Encounter (this consultation)
+    #   - MedicationStatements (what medicines the patient is taking)
+    #   - DetectedIssues (interaction alerts for patient safety)
+    fhir_bundle = generate_fhir_bundle(consult, patient)
+
+    # Save the FHIR bundle to the consultation record and mark as approved
+    updated = update_consult(
+        consult_id,
+        {"fhir_bundle": fhir_bundle, "status": "approved"}
+    )
+
+    # Return the FHIR bundle as the API response
+    # Frontend/ABDM can now use this standardized format
+    return fhir_bundle
 
 
 @app.get("/consult/{consult_id}")
