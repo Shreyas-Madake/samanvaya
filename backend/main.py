@@ -23,6 +23,9 @@ from store import (
 from normalize import normalize_list
 from interactions import check
 
+# Import the real extractor (Phase 3)
+from extract import extract
+
 
 # ---------------------------------------------------------------------------
 # FastAPI app setup
@@ -109,30 +112,24 @@ def transcribe_route(consult_id: str, req: TranscribeRequest):
 @app.post("/consult/{consult_id}/extract")
 def extract_route(consult_id: str):
     """
-    Extract clinical entities from the transcript.
-    For now, returns MOCK data that matches our demo scenario. Status -> 'extracted'.
-
-    In Phase 3, we will replace this with a real rule-based extractor.
+    Extract clinical entities from the transcript using the REAL rule-based extractor.
+    Status -> 'extracted'.
     """
     consult = get_consult(consult_id)
     if consult is None:
         raise HTTPException(status_code=404, detail="Consultation not found")
 
-    # MOCK entities — designed to trigger the Metformin + Fenugreek interaction
-    mock_entities = {
-        "symptoms": ["fatigue"],
-        "conditions": ["Type 2 Diabetes"],
-        "medications": [
-            {"name": "Metformin", "dosage": "500mg", "frequency": "twice daily", "system": "allopathy"},
-            {"name": "Methi", "dosage": "1 tsp", "frequency": "daily", "system": "ayush"},  # Hindi name for Fenugreek
-        ],
-        "allergies": [],
-        "advice": "Continue current medications, monitor blood sugar",
-    }
+    # Get the transcript from the previous step
+    transcript = consult.get("transcript", "")
+    if not transcript:
+        raise HTTPException(status_code=400, detail="No transcript. Run /transcribe first.")
+
+    # Use the REAL extractor
+    entities = extract(transcript)
 
     updated = update_consult(
         consult_id,
-        {"entities": mock_entities, "status": "extracted"}
+        {"entities": entities, "status": "extracted"}
     )
     return updated
 
