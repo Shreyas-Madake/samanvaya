@@ -1,0 +1,718 @@
+<title>SAMANVAYA Clinical Console</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    background: #F8FAFC;
+    color: #1E293B;
+  }
+  .badge {
+    font-weight: 600;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .badge-allopathy {
+    background: #EFF6FF;
+    color: #2563EB;
+    border: 1px solid #BFDBFE;
+  }
+  .badge-ayush {
+    background: #F0FDF4;
+    color: #16A34A;
+    border: 1px solid #BBF7D0;
+  }
+  .badge-symptom {
+    background: #FFF7ED;
+    color: #EA580C;
+    border: 1px solid #FED7AA;
+  }
+  .badge-condition {
+    background: #F5F3FF;
+    color: #7C3AED;
+    border: 1px solid #DDD6FE;
+  }
+  .card-high-risk {
+    border-left: 4px solid #DC2626;
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-left-width: 4px;
+  }
+  .card-moderate-risk {
+    border-left: 4px solid #F59E0B;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-left-width: 4px;
+  }
+  .card-low-risk {
+    border-left: 4px solid #3B82F6;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-left-width: 4px;
+  }
+  .success-banner {
+    background: #F0FDF4;
+    border: 2px solid #16A34A;
+    color: #166534;
+  }
+  .loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #E5E7EB;
+    border-top-color: #0F766E;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .merge-path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw 1.5s ease-out forwards;
+  }
+  @keyframes draw {
+    to { stroke-dashoffset: 0; }
+  }
+  .med-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .med-table th {
+    text-align: left;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748B;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #E2E8F0;
+    background: #F8FAFC;
+  }
+  .med-table td {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .med-table tr:last-child td {
+    border-bottom: none;
+  }
+  .med-table tr:hover td {
+    background: #F8FAFC;
+  }
+</style>
+
+<div class="min-h-screen bg-slate-50">
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-teal-600 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+            S
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">SAMANVAYA</h1>
+            <p class="text-xs text-slate-500">Clinical Medication Safety System</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-semibold">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Consent Obtained
+          </span>
+          <div class="text-right">
+            <p class="text-sm font-semibold text-slate-900">Rahul Sharma</p>
+            <p class="text-xs text-slate-500">Patient ID: <span id="patient-id-display">—</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid lg:grid-cols-2 gap-6">
+      <!-- Left Column: Transcript Input -->
+      <div class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-slate-900">Consultation Transcript</h2>
+            <span class="text-xs text-slate-500">Step 1 of 4</span>
+          </div>
+          <textarea
+            id="transcript-input"
+            class="w-full h-64 p-4 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+            placeholder="Enter consultation notes here..."
+          >Patient is diabetic and takes Glycomet 500mg twice daily. He also complains of fever, I will prescribe Crocin. He mentions taking Methi seeds 1 tsp daily.</textarea>
+          <button
+            id="analyze-btn"
+            class="mt-4 w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            Analyze Consultation
+          </button>
+          <div id="progress-indicator" class="hidden mt-4 text-sm text-slate-600 flex items-center gap-2">
+            <span class="loading-spinner"></span>
+            <span id="progress-text">Starting analysis...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="space-y-6">
+        <!-- Extracted Clinical Note -->
+        <div id="clinical-note-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
+          <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Extracted Clinical Note
+          </h2>
+          <div id="clinical-note-content"></div>
+          <button id="proceed-reconcile-btn" class="mt-6 w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors duration-200 text-sm">
+            Confirm Extracted Data & Proceed to Reconciliation
+          </button>
+        </div>
+
+        <!-- Reconciled Medicine Profile -->
+        <div id="reconcile-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
+          <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Reconciled Medicine Profile
+          </h2>
+          <div id="reconcile-content"></div>
+          <button id="proceed-check-btn" class="mt-6 w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors duration-200 text-sm">
+            Confirm Profile & Check for Interactions
+          </button>
+        </div>
+
+        <!-- Safety Alerts -->
+        <div id="safety-alerts-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
+          <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            Safety Alerts
+          </h2>
+          <div id="safety-alerts-content"></div>
+        </div>
+
+        <!-- Approval & FHIR Export -->
+        <div id="approval-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
+          <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Approval & FHIR Export
+          </h2>
+          <button
+            id="approve-btn"
+            disabled
+            class="w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Approve & Save to ABDM
+          </button>
+          <div id="approval-result" class="hidden mt-4"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:8000';
+
+let currentPatientId = null;
+let currentConsultId = null;
+let currentExtractedData = null;
+let currentReconciledData = null;
+
+const analyzeBtn = document.getElementById('analyze-btn');
+const approveBtn = document.getElementById('approve-btn');
+const proceedReconcileBtn = document.getElementById('proceed-reconcile-btn');
+const proceedCheckBtn = document.getElementById('proceed-check-btn');
+const transcriptInput = document.getElementById('transcript-input');
+const progressIndicator = document.getElementById('progress-indicator');
+const progressText = document.getElementById('progress-text');
+const patientIdDisplay = document.getElementById('patient-id-display');
+
+// Show/hide loading state
+function setLoading(isLoading, message = '') {
+  if (isLoading) {
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = `
+      <span class="loading-spinner"></span>
+      Analyzing...
+    `;
+    progressIndicator.classList.remove('hidden');
+    progressText.textContent = message;
+  } else {
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerHTML = `
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      Analyze Consultation
+    `;
+    progressIndicator.classList.add('hidden');
+  }
+}
+
+function updateProgress(message) {
+  progressText.textContent = message;
+}
+
+// Helper to parse JSON strings if needed
+function parseIfString(value) {
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      return value;
+    }
+  }
+  return value;
+}
+
+// Render clinical note with badges and clean UI
+function renderClinicalNote(data) {
+  const card = document.getElementById('clinical-note-card');
+  const content = document.getElementById('clinical-note-content');
+
+  // Parse entities if it's a JSON string
+  const entities = parseIfString(data.entities) || {};
+  const symptoms = entities.symptoms || [];
+  const conditions = entities.conditions || [];
+  const medications = entities.medications || [];
+  const transcript = data.transcript || '';
+
+  let html = '<div class="space-y-5">';
+
+  // Transcript (clean blockquote)
+  if (transcript) {
+    html += `
+      <div>
+        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Transcript</h3>
+        <blockquote class="border-l-4 border-teal-500 bg-slate-50 p-4 rounded-r-lg text-sm text-slate-700 italic">
+          "${transcript}"
+        </blockquote>
+      </div>
+    `;
+  }
+
+  // Symptoms (orange badges)
+  html += '<div>';
+  html += '<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Symptoms</h3>';
+  if (symptoms.length > 0) {
+    html += '<div class="flex flex-wrap gap-2">';
+    symptoms.forEach(symptom => {
+      html += `<span class="badge badge-symptom">🤒 ${symptom}</span>`;
+    });
+    html += '</div>';
+  } else {
+    html += '<p class="text-sm text-slate-400 italic">No symptoms reported</p>';
+  }
+  html += '</div>';
+
+  // Conditions (purple badges)
+  html += '<div>';
+  html += '<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Conditions</h3>';
+  if (conditions.length > 0) {
+    html += '<div class="flex flex-wrap gap-2">';
+    conditions.forEach(condition => {
+      html += `<span class="badge badge-condition">🩸 ${condition}</span>`;
+    });
+    html += '</div>';
+  } else {
+    html += '<p class="text-sm text-slate-400 italic">No existing conditions</p>';
+  }
+  html += '</div>';
+
+  // Medications (table with system badges)
+  html += '<div>';
+  html += '<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Medications</h3>';
+  if (medications.length > 0) {
+    html += '<div class="border border-slate-200 rounded-lg overflow-hidden">';
+    html += '<table class="med-table">';
+    html += '<thead><tr><th>Drug Name</th><th>Dosage & Frequency</th><th>System</th></tr></thead>';
+    html += '<tbody>';
+    medications.forEach(med => {
+      const badgeClass = med.system === 'allopathy' ? 'badge-allopathy' :
+                         med.system === 'ayush' ? 'badge-ayush' : '';
+      const badgeText = med.system === 'allopathy' ? '💊 Allopathy' :
+                        med.system === 'ayush' ? '🌿 AYUSH' : 'Unknown';
+      const dosageText = [med.dosage, med.frequency].filter(Boolean).join(', ') || '—';
+
+      html += `<tr>
+        <td class="font-semibold text-slate-900">${med.name}</td>
+        <td class="text-slate-600">${dosageText}</td>
+        <td>${badgeClass ? `<span class="badge ${badgeClass}">${badgeText}</span>` : '—'}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+  } else {
+    html += '<p class="text-sm text-slate-400 italic">No medications extracted</p>';
+  }
+  html += '</div>';
+
+  // Developer metadata (collapsible, tiny)
+  html += `
+    <details class="text-xs text-slate-400">
+      <summary class="cursor-pointer hover:text-slate-600 font-medium">Developer Metadata</summary>
+      <pre class="mt-2 p-3 bg-slate-100 rounded text-xs overflow-x-auto">${JSON.stringify({
+        consult_id: data.id,
+        patient_id: data.patient_id,
+        status: data.status,
+        consent: data.consent
+      }, null, 2)}</pre>
+    </details>
+  `;
+
+  html += '</div>';
+  content.innerHTML = html;
+  card.classList.remove('hidden');
+}
+
+// Render reconciled profile with visual merge + separated cards
+function renderReconciledProfile(data) {
+  const card = document.getElementById('reconcile-card');
+  const content = document.getElementById('reconcile-content');
+
+  const medProfile = data.med_profile || {};
+  const allopathy = medProfile.allopathy || [];
+  const ayush = medProfile.ayush || [];
+  const unrecognized = medProfile.unrecognized || [];
+
+  let html = '<div class="space-y-5">';
+
+  // Visual merge diagram
+  html += `
+    <div class="flex items-center justify-center py-4">
+      <svg width="280" height="100" viewBox="0 0 280 100" class="mx-auto">
+        <path d="M 20 20 Q 140 20, 240 50" stroke="#2563EB" stroke-width="3" fill="none" class="merge-path"/>
+        <path d="M 20 80 Q 140 80, 240 50" stroke="#16A34A" stroke-width="3" fill="none" class="merge-path" style="animation-delay: 0.2s"/>
+        <circle cx="240" cy="50" r="8" fill="#0F766E"/>
+        <text x="10" y="25" font-size="12" fill="#2563EB" font-weight="600">Allopathy</text>
+        <text x="10" y="85" font-size="12" fill="#16A34A" font-weight="600">AYUSH</text>
+        <text x="200" y="45" font-size="11" fill="#64748B" font-weight="600">Unified</text>
+      </svg>
+    </div>
+  `;
+
+  // Allopathy medicines card
+  html += '<div class="border-l-4 border-blue-500 bg-blue-50 rounded-r-lg p-4">';
+  html += '<h3 class="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">';
+  html += '<span>💊</span> Allopathy Medicines';
+  html += '</h3>';
+  if (allopathy.length > 0) {
+    html += '<ul class="space-y-2">';
+    allopathy.forEach(med => {
+      html += `<li class="text-sm">
+        <span class="font-semibold text-slate-900">${med.norm_name || med.name}</span>
+        <span class="text-slate-600 text-xs ml-2">${[med.dosage, med.frequency].filter(Boolean).join(', ')}</span>
+      </li>`;
+    });
+    html += '</ul>';
+  } else {
+    html += '<p class="text-sm text-slate-500 italic">None</p>';
+  }
+  html += '</div>';
+
+  // AYUSH medicines card
+  html += '<div class="border-l-4 border-green-500 bg-green-50 rounded-r-lg p-4">';
+  html += '<h3 class="text-sm font-bold text-green-900 mb-3 flex items-center gap-2">';
+  html += '<span>🌿</span> AYUSH / Herbal Medicines';
+  html += '</h3>';
+  if (ayush.length > 0) {
+    html += '<ul class="space-y-2">';
+    ayush.forEach(med => {
+      html += `<li class="text-sm">
+        <span class="font-semibold text-slate-900">${med.norm_name || med.name}</span>
+        <span class="text-slate-600 text-xs ml-2">${[med.dosage, med.frequency].filter(Boolean).join(', ')}</span>
+      </li>`;
+    });
+    html += '</ul>';
+  } else {
+    html += '<p class="text-sm text-slate-500 italic">None</p>';
+  }
+  html += '</div>';
+
+  // Unrecognized (if any)
+  if (unrecognized.length > 0) {
+    html += '<div class="border-l-4 border-amber-500 bg-amber-50 rounded-r-lg p-4">';
+    html += '<h3 class="text-sm font-bold text-amber-900 mb-3 flex items-center gap-2">';
+    html += '<span>⚠️</span> Unrecognized Medicines';
+    html += '</h3>';
+    html += '<ul class="space-y-2">';
+    unrecognized.forEach(med => {
+      html += `<li class="text-sm text-slate-700">${med.name}</li>`;
+    });
+    html += '</ul>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  content.innerHTML = html;
+  card.classList.remove('hidden');
+}
+
+// Render safety alerts
+function renderSafetyAlerts(data) {
+  const card = document.getElementById('safety-alerts-card');
+  const content = document.getElementById('safety-alerts-content');
+
+  const alerts = data.alerts || [];
+  const realAlerts = alerts.filter(a => a.interaction_id !== 'unknown-medication-flag');
+
+  if (realAlerts.length === 0) {
+    content.innerHTML = `
+      <div class="text-center py-8">
+        <div class="text-5xl mb-3">✅</div>
+        <p class="text-base font-semibold text-green-700">No safety alerts detected</p>
+        <p class="text-sm text-slate-500 mt-1">All medication combinations are safe</p>
+      </div>
+    `;
+  } else {
+    let html = '<div class="space-y-4">';
+
+    realAlerts.forEach(alert => {
+      const risk = (alert.risk || 'moderate').toLowerCase();
+      const cardClass = risk === 'high' ? 'card-high-risk' :
+                        risk === 'moderate' ? 'card-moderate-risk' :
+                        'card-low-risk';
+
+      const drugA = alert.drug_a || {};
+      const drugB = alert.drug_b || {};
+      const med1 = drugA.name || 'Unknown';
+      const med2 = drugB.name || 'Unknown';
+
+      html += `
+        <div class="${cardClass} rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl flex-shrink-0">⚠️</span>
+            <div class="flex-1">
+              <h3 class="font-bold text-slate-900 mb-2">
+                <span class="text-xs uppercase tracking-wide">[${risk} Risk]</span><br>
+                ${med1} + ${med2}
+              </h3>
+              <div class="space-y-2 text-sm">
+                <p><strong class="text-slate-700">Effect:</strong> <span class="text-slate-600">${alert.effect || 'Unknown effect'}</span></p>
+                ${alert.mechanism ? `<p><strong class="text-slate-700">Mechanism:</strong> <span class="text-slate-600">${alert.mechanism}</span></p>` : ''}
+                ${alert.recommendation ? `<p><strong class="text-slate-700">Recommendation:</strong> <span class="text-slate-600">${alert.recommendation}</span></p>` : ''}
+                ${alert.condition_match ? `<p class="text-xs text-slate-500">✓ Context-aware: Matches patient condition (${(alert.matched_conditions || []).join(', ')})</p>` : ''}
+              </div>
+              ${alert.evidence && alert.evidence.length > 0 ? `
+                <details class="mt-3 text-xs">
+                  <summary class="cursor-pointer font-semibold text-slate-600 hover:text-slate-900">View Evidence Sources</summary>
+                  <ul class="mt-2 ml-4 space-y-1 text-slate-600">
+                    ${alert.evidence.map(ev => `
+                      <li>• ${ev.source || 'Unknown source'}${ev.reference ? ` (${ev.reference})` : ''}</li>
+                    `).join('')}
+                  </ul>
+                </details>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    content.innerHTML = html;
+  }
+
+  card.classList.remove('hidden');
+}
+
+// Render FHIR approval result
+function renderApprovalResult(fhirBundle) {
+  const resultDiv = document.getElementById('approval-result');
+
+  resultDiv.innerHTML = `
+    <div class="success-banner rounded-lg p-5 flex items-start gap-3 mb-4">
+      <span class="text-4xl flex-shrink-0">✅</span>
+      <div>
+        <p class="font-bold text-base mb-1">Record Approved & Saved to ABDM Timeline</p>
+        <p class="text-sm">FHIR R4 bundle generated successfully. Ready for interoperability.</p>
+      </div>
+    </div>
+    <details class="text-sm border border-slate-200 rounded-lg">
+      <summary class="cursor-pointer p-3 hover:bg-slate-50 font-semibold text-teal-700">View Raw FHIR JSON</summary>
+      <pre class="p-4 bg-slate-50 border-t border-slate-200 overflow-x-auto text-xs font-mono">${JSON.stringify(fhirBundle, null, 2)}</pre>
+    </details>
+  `;
+
+  resultDiv.classList.remove('hidden');
+}
+
+// API call helper
+async function apiCall(endpoint, method = 'POST', body = null) {
+  const options = {
+    method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+
+  if (body && method !== 'GET') {
+    options.body = JSON.stringify(body);
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, options);
+
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// Main analysis workflow (up to extraction)
+async function analyzeConsultation() {
+  try {
+    setLoading(true);
+    const transcript = transcriptInput.value.trim();
+
+    if (!transcript) {
+      alert('Please enter a consultation transcript');
+      setLoading(false);
+      return;
+    }
+
+    // Step 1: Create patient
+    updateProgress('Creating patient record...');
+    const patientData = await apiCall('/patients', 'POST', {
+      name: 'Rahul Sharma',
+      age: 45,
+      sex: 'M'
+    });
+    currentPatientId = patientData.id;
+    patientIdDisplay.textContent = currentPatientId.substring(0, 8);
+
+    // Step 2: Create consultation
+    updateProgress('Starting consultation...');
+    const consultData = await apiCall('/consult', 'POST', {
+      patient_id: currentPatientId,
+      consent: true
+    });
+    currentConsultId = consultData.id;
+
+    // Step 3: Transcribe
+    updateProgress('Saving transcript...');
+    await apiCall(`/consult/${currentConsultId}/transcribe`, 'POST', {
+      text: transcript
+    });
+
+    // Step 4: Extract entities
+    updateProgress('Extracting clinical entities...');
+    const extractData = await apiCall(`/consult/${currentConsultId}/extract`, 'POST');
+    currentExtractedData = extractData;
+    renderClinicalNote(extractData);
+
+    setLoading(false);
+    updateProgress('Extraction complete — review data above');
+
+  } catch (error) {
+    console.error('Analysis failed:', error);
+    alert(`Analysis failed: ${error.message}\n\nMake sure the backend is running on port 8000.`);
+    setLoading(false);
+  }
+}
+
+// Reconciliation workflow
+async function proceedToReconcile() {
+  try {
+    proceedReconcileBtn.disabled = true;
+    proceedReconcileBtn.innerHTML = '<span class="loading-spinner"></span> Reconciling...';
+
+    updateProgress('Reconciling medications...');
+    const reconcileData = await apiCall(`/consult/${currentConsultId}/reconcile`, 'POST');
+    currentReconciledData = reconcileData;
+    renderReconciledProfile(reconcileData);
+
+    proceedReconcileBtn.innerHTML = '✓ Confirmed';
+
+  } catch (error) {
+    console.error('Reconciliation failed:', error);
+    alert(`Reconciliation failed: ${error.message}`);
+    proceedReconcileBtn.disabled = false;
+    proceedReconcileBtn.innerHTML = 'Confirm Extracted Data & Proceed to Reconciliation';
+  }
+}
+
+// Check interactions workflow
+async function proceedToCheck() {
+  try {
+    proceedCheckBtn.disabled = true;
+    proceedCheckBtn.innerHTML = '<span class="loading-spinner"></span> Checking...';
+
+    updateProgress('Checking for interactions...');
+    const checkData = await apiCall(`/consult/${currentConsultId}/check`, 'POST');
+    renderSafetyAlerts(checkData);
+
+    proceedCheckBtn.innerHTML = '✓ Confirmed';
+
+    // Enable approve button
+    document.getElementById('approval-card').classList.remove('hidden');
+    approveBtn.disabled = false;
+
+  } catch (error) {
+    console.error('Check failed:', error);
+    alert(`Interaction check failed: ${error.message}`);
+    proceedCheckBtn.disabled = false;
+    proceedCheckBtn.innerHTML = 'Confirm Profile & Check for Interactions';
+  }
+}
+
+// Approval workflow
+async function approveConsultation() {
+  try {
+    approveBtn.disabled = true;
+    approveBtn.innerHTML = `
+      <span class="loading-spinner"></span>
+      Approving...
+    `;
+
+    const fhirBundle = await apiCall(`/consult/${currentConsultId}/approve`, 'POST');
+    renderApprovalResult(fhirBundle);
+
+    approveBtn.innerHTML = `
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      Approved
+    `;
+
+  } catch (error) {
+    console.error('Approval failed:', error);
+    alert(`Approval failed: ${error.message}`);
+    approveBtn.disabled = false;
+    approveBtn.innerHTML = `
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      Approve & Save to ABDM
+    `;
+  }
+}
+
+// Event listeners
+analyzeBtn.addEventListener('click', analyzeConsultation);
+proceedReconcileBtn.addEventListener('click', proceedToReconcile);
+proceedCheckBtn.addEventListener('click', proceedToCheck);
+approveBtn.addEventListener('click', approveConsultation);
+</script>
