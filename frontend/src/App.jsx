@@ -201,7 +201,7 @@ function ConsultationFlow({ onComplete }) {
   const [patientId, setPatientId] = useState("");
   const [consultId, setConsultId] = useState("");
   const [transcript, setTranscript] = useState(
-    "Patient complains of headache and fatigue. Currently taking Metformin 500mg twice daily and Fenugreek seeds."
+    "Patient is diabetic and complains of fatigue. Currently taking Metformin 500mg twice daily and methi 1 tsp daily."
   );
   const [extracted, setExtracted] = useState(null);
   const [reconciled, setReconciled] = useState(null);
@@ -228,7 +228,8 @@ function ConsultationFlow({ onComplete }) {
     }
   }
 
-  const hasAlert = interactions && JSON.stringify(interactions).toLowerCase().includes("interaction");
+  const alerts = interactions?.alerts || [];
+  const hasAlert = alerts.length > 0;
 
   async function createPatient() {
     const data = await call("/patients", "POST", { name: patientForm.name, age: Number(patientForm.age), sex: patientForm.sex });

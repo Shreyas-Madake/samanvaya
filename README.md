@@ -1,4 +1,4 @@
-# SAMANVAYA Backend
+# SAMANVAYA
 
 **SAMANVAYA** is a multilingual clinical medication safety tool for Smart India Hackathon 2026.
 
@@ -6,19 +6,39 @@ It helps doctors identify dangerous interactions between **Allopathy** (modern m
 
 ---
 
-## What You Have Now
+## How to Run
 
-A basic **runnable backend skeleton** with:
-- FastAPI server
-- In-memory storage (no database yet)
-- Mock endpoints for the full consultation pipeline
-- CORS enabled for frontend development
+**IMPORTANT:** Both the backend AND frontend servers must run at the same time. The frontend (running on port 5173) calls the backend (running on port 8000).
 
-The server doesn't do real work yet — all responses are hard-coded placeholders. This lets you test the API shape and confirm everything runs before we build the real logic.
+### Terminal 1 — Backend (FastAPI)
+
+```bash
+cd backend
+# Activate the virtual environment (Windows)
+.venv\Scripts\activate
+# Start the backend server
+uvicorn main:app --reload --port 8000
+```
+
+You should see: `Uvicorn running on http://127.0.0.1:8000`
+
+### Terminal 2 — Frontend (React + Vite)
+
+```bash
+cd frontend
+# One-time install (if node_modules doesn't exist)
+npm install
+# Start the frontend dev server
+npm run dev
+```
+
+You should see: `Local: http://localhost:5173/`
+
+Open **http://localhost:5173** in your browser to use the app.
 
 ---
 
-## How to Install and Run (Windows)
+## First-Time Setup (Windows)
 
 ### 1. Navigate to the backend folder
 ```bash

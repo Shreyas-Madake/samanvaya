@@ -69,8 +69,9 @@ def create_consult(patient_id: str, consent: bool) -> dict:
         "status": "created",
         "transcript": None,
         "entities": None,
-        "medicines": None,
-        "interactions": None,
+        "med_profile": None,
+        "alerts": None,
+        "fhir_bundle": None,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     consults[consult_id] = consult

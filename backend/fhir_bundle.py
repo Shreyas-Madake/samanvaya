@@ -60,7 +60,7 @@ def generate_fhir_bundle(consult: dict, patient: dict) -> dict:
     all_meds = med_profile.get("all", [])
 
     for med in all_meds:
-        bundle["entry"].append(create_medication_statement(med, consult["id"]))
+        bundle["entry"].append(create_medication_statement(med, consult["id"], patient["id"]))
 
     # Entry N+: DetectedIssue resources (one per interaction alert)
     # WHAT: Documents drug-drug or herb-drug interaction warnings
@@ -68,8 +68,9 @@ def generate_fhir_bundle(consult: dict, patient: dict) -> dict:
     alerts = consult.get("alerts", [])
 
     for alert in alerts:
-        # Skip the "flag_unknown_meds" alert type (not a drug interaction)
-        if alert.get("type") == "flag_unknown_meds":
+        # Skip the "unknown medication" flag — it is not a real interaction,
+        # so it must NOT become a DetectedIssue.
+        if alert.get("interaction_id") == "unknown-medication-flag":
             continue
 
         bundle["entry"].append(create_detected_issue(alert, consult["id"]))
@@ -146,7 +147,7 @@ def create_encounter_resource(consult: dict) -> dict:
     - period: when the consultation happened
 
     Args:
-        consult: The consultation object with id, timestamp
+        consult: The consultation object with id, created_at
 
     Returns:
         dict: A FHIR Bundle entry containing an Encounter resource
@@ -162,7 +163,7 @@ def create_encounter_resource(consult: dict) -> dict:
                 "display": "ambulatory"
             },
             "period": {
-                "start": consult.get("timestamp", datetime.utcnow().isoformat() + "Z"),
+                "start": consult.get("created_at", datetime.utcnow().isoformat() + "Z"),
                 "end": datetime.utcnow().isoformat() + "Z"
             },
             "subject": {
@@ -178,7 +179,7 @@ def create_encounter_resource(consult: dict) -> dict:
 # HOW:  Maps our normalized medication dict to FHIR MedicationStatement
 # ---------------------------------------------------------------------------
 
-def create_medication_statement(med: dict, encounter_id: str) -> dict:
+def create_medication_statement(med: dict, encounter_id: str, patient_id: str) -> dict:
     """
     Create a FHIR MedicationStatement resource.
 
@@ -191,6 +192,7 @@ def create_medication_statement(med: dict, encounter_id: str) -> dict:
     Args:
         med: Normalized medication dict with name, dosage, frequency, system
         encounter_id: The consultation ID this medication was documented in
+        patient_id: The patient ID this medication belongs to
 
     Returns:
         dict: A FHIR Bundle entry containing a MedicationStatement resource
@@ -218,11 +220,9 @@ def create_medication_statement(med: dict, encounter_id: str) -> dict:
             "status": "active",  # Patient is currently taking this medication
             "medicationCodeableConcept": {
                 "text": med_name,
-                # If we had drug codes (RxNorm, SNOMED), we'd add them here:
-                # "coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "..."}]
             },
             "subject": {
-                "reference": f"Patient/{med.get('patient_id', 'unknown')}"
+                "reference": f"Patient/{patient_id}"
             },
             "context": {
                 "reference": f"Encounter/{encounter_id}"
@@ -255,65 +255,57 @@ def create_medication_statement(med: dict, encounter_id: str) -> dict:
 
 def create_detected_issue(alert: dict, encounter_id: str) -> dict:
     """
-    Create a FHIR DetectedIssue resource.
+    Create a FHIR DetectedIssue resource from an interaction alert.
 
-    FHIR DetectedIssue documents clinical decision support alerts:
-    - status: "final" (the alert has been reviewed and is actionable)
-    - severity: maps our risk levels (HIGH/MODERATE/LOW) to FHIR severity codes
-    - code: what kind of issue (drug-drug interaction)
-    - detail: explains WHAT the interaction is and WHY it's dangerous
-    - mitigation: what the clinician should do about it
-
-    Args:
-        alert: Interaction alert dict with risk, med1, med2, effect, mechanism, etc.
-        encounter_id: The consultation ID where this alert was raised
-
-    Returns:
-        dict: A FHIR Bundle entry containing a DetectedIssue resource
+    WHAT: turns one interaction alert into a FHIR clinical-safety record.
+    WHY:  the alert shape is defined by interactions.py (the source of truth),
+          so we read EXACTLY the keys it produces: drug_a/drug_b (nested dicts)
+          and a LOWERCASE risk ("high"/"moderate"/"low").
     """
-    # Map our risk levels to FHIR severity codes
-    # FHIR uses: "high", "moderate", "low"
-    severity_map = {
-        "HIGH": "high",
-        "MODERATE": "moderate",
-        "LOW": "low"
-    }
-    severity = severity_map.get(alert.get("risk", "MODERATE"), "moderate")
+    # Map our lowercase risk to a FHIR severity code (high/moderate/low).
+    severity_map = {"high": "high", "moderate": "moderate", "low": "low"}
+    risk = alert.get("risk", "moderate")
+    severity = severity_map.get(risk, "moderate")
 
-    # Build the detail text (explains the interaction)
-    med1 = alert.get("med1", "Unknown")
-    med2 = alert.get("med2", "Unknown")
+    # Pull the two medicine names out of the nested drug dicts (guard None).
+    drug_a = alert.get("drug_a") or {}
+    drug_b = alert.get("drug_b") or {}
+    med1 = drug_a.get("name", "Unknown")
+    med2 = drug_b.get("name", "Unknown")
+
+    # Decide drug-drug vs herb-drug from the id prefix ("drug:" / "herb:").
+    ids = [str(drug_a.get("id", "")), str(drug_b.get("id", ""))]
+    is_herb_drug = any(i.startswith("herb:") for i in ids)
+    issue_text = "Herb-Drug Interaction" if is_herb_drug else "Drug-Drug Interaction"
+
     effect = alert.get("effect", "Unknown effect")
     mechanism = alert.get("mechanism", "")
-    risk = alert.get("risk", "MODERATE")
 
-    detail_text = f"[{risk}] {med1} + {med2}: {effect}"
+    detail_text = f"[{risk.upper()}] {med1} + {med2}: {effect}"
     if mechanism:
         detail_text += f" (Mechanism: {mechanism})"
 
-    # Build the mitigation text (what to do about it)
     recommendation = alert.get("recommendation", "Consult prescribing information.")
     mitigation_text = f"Recommendation: {recommendation}"
 
-    # Add clinical significance if present
-    if alert.get("clinical_significance"):
-        mitigation_text += f" Clinical significance: {alert['clinical_significance']}"
+    safe_a = med1.replace(" ", "-")
+    safe_b = med2.replace(" ", "-")
 
     return {
         "resource": {
             "resourceType": "DetectedIssue",
-            "id": f"issue-{alert.get('med1', 'unknown').replace(' ', '-')}-{alert.get('med2', 'unknown').replace(' ', '-')}",
-            "status": "final",  # Alert has been reviewed and is actionable
+            "id": f"issue-{safe_a}-{safe_b}",
+            "status": "final",
             "severity": severity,
             "code": {
                 "coding": [
                     {
                         "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-                        "code": "DRG",  # Drug interaction alert
+                        "code": "DRG",
                         "display": "Drug Interaction Alert"
                     }
                 ],
-                "text": "Drug-Drug Interaction" if alert.get("type") != "herb_drug" else "Herb-Drug Interaction"
+                "text": issue_text
             },
             "detail": detail_text,
             "identified": datetime.utcnow().isoformat() + "Z",
@@ -322,19 +314,12 @@ def create_detected_issue(alert: dict, encounter_id: str) -> dict:
                 {"display": med2}
             ],
             "mitigation": [
-                {
-                    "action": {
-                        "text": mitigation_text
-                    }
-                }
+                {"action": {"text": mitigation_text}}
             ],
-            # Link to the encounter where this was detected
             "extension": [
                 {
                     "url": "http://samanvaya.gov.in/fhir/StructureDefinition/detected-in-encounter",
-                    "valueReference": {
-                        "reference": f"Encounter/{encounter_id}"
-                    }
+                    "valueReference": {"reference": f"Encounter/{encounter_id}"}
                 }
             ]
         }
@@ -402,15 +387,16 @@ if __name__ == "__main__":
         },
         "alerts": [
             {
-                "type": "herb_drug",
-                "risk": "HIGH",
-                "med1": "Metformin",
-                "med2": "Fenugreek",
+                "interaction_id": "int-metformin-fenugreek",
+                "drug_a": {"id": "drug:metformin", "name": "Metformin", "original": "Metformin"},
+                "drug_b": {"id": "herb:fenugreek", "name": "Fenugreek", "original": "methi"},
+                "risk": "high",
                 "effect": "Additive hypoglycemic effect",
                 "mechanism": "Both lower blood glucose; combined effect increases hypoglycemia risk",
                 "recommendation": "Monitor blood glucose closely. Consider dose adjustment.",
-                "clinical_significance": "Increased in diabetic patients",
-                "citation": "Interaction validated in clinical studies"
+                "evidence": [],
+                "condition_match": True,
+                "matched_conditions": ["Type 2 Diabetes"]
             }
         ]
     }
@@ -450,6 +436,13 @@ if __name__ == "__main__":
     # Check for DetectedIssues
     issue_resources = [e for e in bundle["entry"] if e["resource"]["resourceType"] == "DetectedIssue"]
     assert len(issue_resources) == 1, f"❌ Bundle should have 1 DetectedIssue, got {len(issue_resources)}"
+
+    issue = next(e["resource"] for e in bundle["entry"]
+                 if e["resource"]["resourceType"] == "DetectedIssue")
+    assert issue["severity"] == "high", f"severity should be high, got {issue['severity']}"
+    names = [imp["display"] for imp in issue["implicated"]]
+    assert "Metformin" in names and "Fenugreek" in names, f"wrong meds: {names}"
+    print("DetectedIssue severity + implicated meds are correct")
 
     print("\n✓ All FHIR bundle structure tests passed!")
     print("=" * 70)
